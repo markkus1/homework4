@@ -10,7 +10,7 @@
         <div v-if="loading" class="loading">Loading posts...</div>
 
         <div v-else>
-          <div class="post" v-for="post in posts" :key="post.id">
+          <div class="post" v-for="post in posts" :key="post.id"  @click="openPost(post.id)" style="cursor: pointer;">
             <div class="post-header">
               <span class="author">{{ post.author }}</span>
               <span class="date">{{ formatDate(post.date) }}</span>
@@ -20,8 +20,8 @@
         </div>
 
         <div class="button-row" v-if="authResult">
-          <button @click="Logout" class="center">Logout</button>
-          <button @click="Logout" class="center">Logout</button>
+          <button @click="goAddPost" class="center">Add post</button>
+          <button @click="deleteAllPosts" class="center">Delete all</button>
         </div>
       </div>
 
@@ -44,7 +44,9 @@ export default {
       loading: false,
     };
   },
+
   methods: {
+    // Log out user
     Logout() {
       fetch("http://localhost:3000/auth/logout", {
         credentials: "include",
@@ -54,6 +56,7 @@ export default {
         .catch((e) => console.log("Logout error:", e));
     },
 
+    // Fetch all posts from backend
     async fetchPosts() {
       try {
         this.loading = true;
@@ -69,6 +72,7 @@ export default {
       }
     },
 
+    // Format the date
     formatDate(dateStr) {
       const date = new Date(dateStr);
       return date.toLocaleDateString("en-US", {
@@ -77,6 +81,28 @@ export default {
         day: "numeric",
       });
     },
+
+    // Navigate to a specific post page
+    openPost(id) {
+      this.$router.push(`/post/${id}`);
+    },
+
+    // Delete ALL posts from the database
+    async deleteAllPosts() {
+      if (!confirm("Delete all posts?")) return;
+
+      await fetch("http://localhost:3000/posts", {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      this.fetchPosts(); // refresh posts
+    },
+
+    // OPTIONAL: Navigate to add post page
+    goAddPost() {
+      this.$router.push("/add-post");
+    },
   },
 
   mounted() {
@@ -84,6 +110,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .container {
@@ -168,4 +195,6 @@ export default {
   font-size: 14px;
   margin: 0.5rem 0;
 }
+
+
 </style>

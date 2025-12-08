@@ -151,3 +151,14 @@ app.post("/posts", async (req, res) => {
         res.status(500).send("Server error");
     }
 });
+
+// Delete ALL posts 
+app.delete("/posts", async (req, res) => {
+  try {
+    await pool.query("DELETE FROM posts");
+    res.json({ message: "All posts deleted" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});

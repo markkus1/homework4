@@ -30,6 +30,30 @@ const routes = [{
         name: "LogIn",
         component: LogIn,
     },
+
+    // ADD POST PAGE
+     {
+    path: "/add-post",
+    name: "AddPost",
+    component: () => import("../views/AddPost.vue"),
+    beforeEnter: async (to, from, next) => {
+      let authResult = await auth.authenticated();
+      if (!authResult) next("/login");
+      else next();
+    },
+  },
+
+  // POST PAGE (for clickable posts)
+  {
+    path: "/post/:id",
+    name: "PostPage",
+    component: () => import("../views/PostPage.vue"), // can be placeholder
+    beforeEnter: async (to, from, next) => {
+      let authResult = await auth.authenticated();
+      if (!authResult) next("/login");
+      else next();
+    },
+  },
     {
         path: "/about",
         name: "about",
