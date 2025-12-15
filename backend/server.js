@@ -152,7 +152,7 @@ app.post("/posts", async (req, res) => {
     }
 });
 
-// Delete ALL posts 
+// Delete ALL posts
 app.delete("/posts", async (req, res) => {
   try {
     await pool.query("DELETE FROM posts");
@@ -161,4 +161,40 @@ app.delete("/posts", async (req, res) => {
     console.error(err.message);
     res.status(500).send("Server error");
   }
+});
+
+// Get single post
+app.get("/posts/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query("SELECT * FROM posts WHERE id = $1", [id]);
+        if (result.rows.length === 0) return res.status(404).json({ error: "Post not found" });
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).send("Server error");
+    }
+});
+
+// Update post
+app.put("/posts/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { content } = req.body;
+        const result = await pool.query("UPDATE posts SET content = $1 WHERE id = $2 RETURNING *", [content, id]);
+        if (result.rows.length === 0) return res.status(404).json({ error: "Post not found" });
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).send("Server error");
+    }
+});
+
+// Delete single post
+app.delete("/posts/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query("DELETE FROM posts WHERE id = $1", [id]);
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).send("Server error");
+    }
 });
