@@ -42,14 +42,20 @@ export default {
         credentials: "include",
         body: JSON.stringify(data),
       })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-          this.$router.push("/");
-        })
-        .catch((e) => {
-          console.log("error", e);
-        });
+        .then(async (response) => {
+      const result = await response.json();
+      if (!response.ok) {
+        // Show backend error to user
+        alert(result.message || "Signup failed");
+        return;
+      }
+      console.log(result);
+      this.$router.push("/");
+      })
+      .catch((e) => {
+        console.log("error", e);
+        alert("Network error, please try again");
+      });
     },
   },
 };

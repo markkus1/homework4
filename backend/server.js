@@ -66,8 +66,21 @@ app.post('/auth/signup', async(req, res) => {
         //console.log(req.body);
         const { email, password } = req.body;
 
+        //Check if email exists
+        const userExists = await pool.query(
+            "SELECT 1 FROM users WHERE email = $1",
+            [email]
+        );
+
+        if (userExists.rows.length > 0) {
+            return res.status(409).json({
+                message: "Email already exists"
+        });
+        }
+        
         const salt = await bcrypt.genSalt(); //  generates the salt, i.e., a random string
-        const bcryptPassword = await bcrypt.hash(password, salt) // hash the password and the salt 
+        const bcryptPassword = await bcrypt.hash(password, salt) // hash the password and the salt
+
         const authUser = await pool.query( // insert the user and the hashed password into the database
             "INSERT INTO users(email, password) values ($1, $2) RETURNING*", [email, bcryptPassword]
         );
@@ -80,10 +93,10 @@ app.post('/auth/signup', async(req, res) => {
             .status(201)
             .cookie('jwt', token, { maxAge: 6000000, httpOnly: true })
             .json({ user_id: authUser.rows[0].id })
-            .send;
+    
     } catch (err) {
         console.error(err.message);
-        res.status(400).send(err.message);
+        
     }
 });
 

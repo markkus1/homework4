@@ -5,7 +5,7 @@ const pool = new Pool({
     password: "parool", //add your password
     database: "testWad",
     host: "localhost",
-    port: "5432"
+    port: "5433"
 });
 
 const execute = async(query) => {
