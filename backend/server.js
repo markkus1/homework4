@@ -84,19 +84,22 @@ app.post('/auth/signup', async(req, res) => {
         const authUser = await pool.query( // insert the user and the hashed password into the database
             "INSERT INTO users(email, password) values ($1, $2) RETURNING*", [email, bcryptPassword]
         );
-        console.log(authUser.rows[0].id);
+        
         const token = await generateJWT(authUser.rows[0].id); // generates a JWT by taking the user id as an input (payload)
-        //console.log(token);
-        //res.cookie("isAuthorized", true, { maxAge: 1000 * 60, httpOnly: true });
-        //res.cookie('jwt', token, { maxAge: 6000000, httpOnly: true });
+        
+        
         res
             .status(201)
             .cookie('jwt', token, { maxAge: 6000000, httpOnly: true })
             .json({ user_id: authUser.rows[0].id })
     
     } catch (err) {
-        console.error(err.message);
-        
+         if (err.code === '23505') {
+      return res.status(409).json({ message: "Email already exists" });
+    }
+
+    console.error(err);
+    res.status(500).json({ message: "Signup failed" });
     }
 });
 
